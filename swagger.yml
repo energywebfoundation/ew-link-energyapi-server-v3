@@ -16,7 +16,6 @@ paths:
       tags:
       - Asset
       summary: Create a new asset, returns asset id
-      operationId: asset_post
       parameters:
       - name: role
         in: query
@@ -105,13 +104,11 @@ paths:
                 $ref: '#/components/schemas/Error'
         501:
           description: 'Not Implemented: The server does not have this message implemented.'
-      x-openapi-router-controller: swagger_server.controllers.asset_controller
   /asset/{assetID}:
     get:
       tags:
       - Asset
       summary: Get asset information by id
-      operationId: get_asset
       parameters:
       - name: assetID
         in: path
@@ -128,12 +125,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Asset'
       security: []
-      x-openapi-router-controller: swagger_server.controllers.asset_controller
     delete:
       tags:
       - Asset
       summary: Delete an asset and it's metering data
-      operationId: asset_asset_iddelete
       parameters:
       - name: assetID
         in: path
@@ -145,13 +140,11 @@ paths:
       responses:
         200:
           description: Success
-      x-openapi-router-controller: swagger_server.controllers.asset_controller
   /asset/{assetID}/energy:
     get:
       tags:
       - Energy
       summary: Get energy measurements of asset
-      operationId: asset_asset_id_energy_get
       parameters:
       - name: assetID
         in: path
@@ -209,7 +202,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Energy'
                 x-content-type: application/json
-      x-openapi-router-controller: swagger_server.controllers.energy_controller
     post:
       tags:
       - Energy
