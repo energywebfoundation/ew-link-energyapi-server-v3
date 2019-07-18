@@ -37,7 +37,6 @@ class MyResolver(Resolver):
         Resolves the operationId using REST semantics
         :type operation: connexion.operations.AbstractOperation
         """
-        print(operation.path)
         path_match = re.search(
             r'^/?(?P<resource_name>([\w\-](?<!/))*)(?P<trailing_slash>/*)(?P<extended_path>.*)$', operation.path
         )
@@ -83,8 +82,6 @@ class MyResolver(Resolver):
 
             return function_name
 
-        print("controller", get_controller_name())
-        print("function", get_function_name())
         return '{}.{}'.format(get_controller_name(), get_function_name())
 
 
