@@ -5,8 +5,8 @@ from __future__ import absolute_import
 from flask import json
 from six import BytesIO
 
-from swagger_server.models.energy import Energy  # noqa: E501
-from swagger_server.test import BaseTestCase
+from api.model.energy import Energy  # noqa: E501
+from api.test import BaseTestCase
 
 
 class TestEnergyController(BaseTestCase):

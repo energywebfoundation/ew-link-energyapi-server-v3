@@ -47,10 +47,6 @@ class MyResolver(Resolver):
 
             name = self.default_module_name
             resource_name = path_match.group('resource_name')
-            extended_path = path_match.group('extended_path')
-            print("name", name)
-            print("resource_name", resource_name)
-            print("extended_path", extended_path)
 
             if x_router_controller:
                 name = x_router_controller
@@ -69,10 +65,26 @@ class MyResolver(Resolver):
                 and path_match.group('resource_name') \
                 and not path_match.group('extended_path')
 
-            return self.collection_endpoint_name if is_collection_endpoint else method.lower()
+            extended_path = path_match.group('extended_path')
+            extended_path_match = re.search(
+                r'^/?(\{)(?P<param_name>(\w)*)(\})(?P<trailing_slash>/*)(?P<method_name>.*)$', extended_path
+            )
 
-        print(get_controller_name())
-        print(get_function_name())
+            method_name = ""
+            if extended_path:
+                method_name = extended_path_match.group("method_name")
+                if method_name:
+                    method_name = f"_{method_name}"
+
+            if is_collection_endpoint:
+                function_name = f"{self.collection_endpoint_name}{method_name}"
+            else:
+                function_name = f"{method.lower()}{method_name}"
+
+            return function_name
+
+        print("controller", get_controller_name())
+        print("function", get_function_name())
         return '{}.{}'.format(get_controller_name(), get_function_name())
 
 
@@ -80,7 +92,7 @@ from flask import render_template
 import config
 
 connex_app = config.connex_app
-connex_app.add_api("swagger.yml", arguments={'title': 'Energy Measurement API'}, pythonic_params=True, resolver=MyResolver('api'))
+connex_app.add_api("swagger.yml", arguments={'title': 'Energy Measurement API'}, pythonic_params=True, resolver=MyResolver('api.controller'))
 
 if __name__ == "__main__":
     connex_app.run(debug=True)

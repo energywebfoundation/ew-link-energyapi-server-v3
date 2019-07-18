@@ -1,79 +1,60 @@
 openapi: 3.0.1
 info:
   title: Energy Measurement API
-  description: Company name, project name, purpose of the api creation, date of last
+  description: >-
+    Company name, project name, purpose of the api creation, date of last
     update, sometimes code author name.
-  version: 3-oas3
-servers:
-- url: https://api.yourcompany.com/v3
-  description: replace with server endpoint
+  version: "3-oas3"
+servers: 
+  - url: https://api.yourcompany.com/v3
+    description: replace with server endpoint
 security:
-- basicAuth: []
-- appID: []
+  - basicAuth: []
+  - appID: []
+  
 paths:
   /asset:
     post:
-      tags:
-      - Asset
+      tags: 
+        - Asset
       summary: Create a new asset, returns asset id
       parameters:
-      - name: role
-        in: query
-        description: Whether this assset is a producer or consumer
-        required: true
-        style: form
-        explode: true
-        schema:
-          $ref: '#/components/schemas/AssetRole'
-      - name: manufacturer
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: model
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: serialNumber
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: latitude
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: number
-      - name: longitude
-        in: query
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: number
-      - name: energyUnit
-        in: query
-        required: true
-        style: form
-        explode: true
-        schema:
-          $ref: '#/components/schemas/EnergyUnit'
-      - name: isAccumulated
-        in: query
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: boolean
+        - in: query
+          name: role
+          required: true
+          description: Whether this assset is a producer or consumer
+          schema:
+            $ref: '#/components/schemas/AssetRole'
+        - in: query
+          name: manufacturer
+          schema:
+            type: string
+        - in: query
+          name: model
+          schema:
+            type: string
+        - in: query
+          name: serialNumber
+          schema:
+            type: string
+        - in: query
+          name: latitude
+          schema:
+            type: number
+        - in: query
+          name: longitude
+          schema:
+            type: number
+        - in: query
+          name: energyUnit
+          required: true
+          schema:
+            $ref: '#/components/schemas/EnergyUnit'
+        - in: query
+          name: isAccumulated
+          required: true
+          schema:
+            type: boolean
       responses:
         201:
           description: Created
@@ -85,10 +66,9 @@ paths:
             GetAssetByID:
               operationId: getAsset
               parameters:
-                assetID: $response.body#/id
+                assetID: '$response.body#/id'
         400:
-          description: 'Bad request: All required fields need to be set. | energyUnit
-            needs to be a valid choice.'
+          description: 'Bad request: All required fields need to be set. | energyUnit needs to be a valid choice.'
           content:
             application/json:
               schema:
@@ -96,27 +76,26 @@ paths:
         401:
           description: 'Unauthorized: Check authorisation'
         500:
-          description: 'Internal server error: Check error message for additional
-            details.'
+          description: 'Internal server error: Check error message for additional details.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         501:
           description: 'Not Implemented: The server does not have this message implemented.'
+                
   /asset/{assetID}:
-    get:
-      tags:
-      - Asset
-      summary: Get asset information by id
-      parameters:
-      - name: assetID
-        in: path
-        required: true
-        style: simple
-        explode: false
+    parameters:
+      - in: path
+        name: assetID
         schema:
           type: integer
+        required: true
+    get:
+      tags: 
+        - Asset
+      summary: Get asset information by id
+      security: [] # No authentication
       responses:
         200:
           description: Success
@@ -124,52 +103,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Asset'
-      security: []
     delete:
       tags:
-      - Asset
+        - Asset
       summary: Delete an asset and it's metering data
-      parameters:
-      - name: assetID
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: integer
       responses:
         200:
           description: Success
+                  
   /asset/{assetID}/energy:
-    get:
-      tags:
-      - Energy
-      summary: Get energy measurements of asset
-      parameters:
-      - name: assetID
-        in: path
-        required: true
-        style: simple
-        explode: false
+    parameters:
+      - in: path
+        name: assetID
         schema:
           type: integer
-      - name: role
-        in: query
-        description: Role of energy asset for which the measurement is returned
         required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - producer
-          - consumer
+    post:
+      tags: 
+        - Energy
+      summary: Publish new energy measurement
+      parameters: 
+        - in: query
+          name: energy
+          description: Registered in the asset energy unit
+          required: true
+          schema:
+            type: number
+        - in: query
+          name: measurement_time
+          description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Energy'
+    get:
+      tags: 
+        - Energy
+      summary: Get energy measurements of asset
+      parameters:
       - name: timeStart
         in: query
         description: Date in RFC 3339 format. ie. 2018-03-14T17:11:19+00:00
         required: false
-        style: form
-        explode: true
         schema:
           type: string
           format: date-time
@@ -177,8 +159,6 @@ paths:
         in: query
         description: Date in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
         required: false
-        style: form
-        explode: true
         schema:
           type: string
           format: date-time
@@ -186,12 +166,11 @@ paths:
         in: query
         description: How many items to return at one time (max 10)
         required: false
-        style: form
-        explode: true
         schema:
           type: integer
           format: int32
           default: 5
+
       responses:
         200:
           description: Success
@@ -201,60 +180,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Energy'
-                x-content-type: application/json
-    post:
-      tags:
-      - Energy
-      summary: Publish new energy measurement
-      operationId: asset_asset_id_energy_post
-      parameters:
-      - name: assetID
-        in: path
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: integer
-      - name: energy
-        in: query
-        description: Registered in the asset energy unit
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: number
-      - name: measurement_time
-        in: query
-        description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-          format: date-time
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Energy'
-      x-openapi-router-controller: swagger_server.controllers.energy_controller
+                
 components:
   schemas:
+
     AssetRole:
       type: string
       enum:
-      - producer
-      - consumer
+        - producer
+        - consumer
+          
     EnergyUnit:
       type: string
       enum:
-      - joule
-      - wattHour
-      - kilowattHour
-      - megawattHour
-      - gigawattHour
+        - joule
+        - wattHour
+        - kilowattHour
+        - megawattHour
+        - gigawattHour
+
     Asset:
       type: object
       properties:
@@ -278,33 +222,22 @@ components:
           $ref: '#/components/schemas/EnergyUnit'
         is_accumulated:
           type: boolean
-      example:
-        is_accumulated: true
-        role: producer
-        latitude: 6.027456183070403
-        energy_unit: joule
-        model: model
-        serial_number: serial_number
-        id: 0
-        manufacturer: manufacturer
-        longitude: 1.4658129805029452
+          
     Energy:
       type: object
+      description: Energy measured at a certain time
       properties:
         energy:
           type: number
           description: Registered in Mega Watts
         measurement_time:
           type: string
-          description: Time of measurement in the device, in RFC 3339 format. ie.
-            2018-03-14T17:12:20+00:00
+          description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
           format: date-time
-      description: Energy measured at a certain time
-      example:
-        measurement_time: 2000-01-23T04:56:07.000+00:00
-        energy: 0.8008281904610115
+          
     Error:
       type: object
+      description: Error information
       properties:
         error:
           type: string
@@ -312,15 +245,15 @@ components:
         message:
           type: string
           description: Additional error information
-      description: Error information
+
   securitySchemes:
     basicAuth:
       type: http
       scheme: basic
-      x-basicInfoFunc: swagger_server.controllers.authorization_controller.check_basicAuth
+      x-basicInfoFunc: api.controller.authorization.check_basicAuth
+
     appID:
       type: apiKey
-      name: X-API-Key
       in: header
-      x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_appID
-
+      name: X-API-Key
+      x-apikeyInfoFunc: api.controller.authorization.check_appID

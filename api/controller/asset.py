@@ -3,9 +3,9 @@ import six
 
 from flask import make_response, abort
 from config import db
-from swagger_server.models.asset_model import Asset, AssetSchema
+from api.model.asset_model import Asset, AssetSchema
 
-def asset_asset_iddelete(asset_id):  # noqa: E501
+def delete(asset_id):  # noqa: E501
     """Delete an asset and it's metering data
 
      # noqa: E501
@@ -18,7 +18,7 @@ def asset_asset_iddelete(asset_id):  # noqa: E501
     return 'do some magic!'
 
 
-def asset_post(role, energy_unit, is_accumulated, manufacturer=None, model=None, serial_number=None, latitude=None, longitude=None):  # noqa: E501
+def post(role, energy_unit, is_accumulated, manufacturer=None, model=None, serial_number=None, latitude=None, longitude=None):  # noqa: E501
     """Create a new asset, returns asset id
 
      # noqa: E501
@@ -60,7 +60,7 @@ def asset_post(role, energy_unit, is_accumulated, manufacturer=None, model=None,
     return data, 201
 
 
-def get_asset(asset_id):  # noqa: E501
+def get(asset_id):  # noqa: E501
     """Get asset information by id
 
      # noqa: E501
@@ -82,3 +82,40 @@ def get_asset(asset_id):  # noqa: E501
     else:
         abort(404, f"Asset not found for ID: {asset_id}")
 
+
+def get_energy(asset_id, time_start=None, time_end=None, limit=None):  # noqa: E501
+    """Get energy measurements of asset
+
+     # noqa: E501
+
+    :param asset_id: 
+    :type asset_id: int
+    :param role: Role of energy asset for which the measurement is returned
+    :type role: str
+    :param time_start: Date in RFC 3339 format. ie. 2018-03-14T17:11:19+00:00
+    :type time_start: str
+    :param time_end: Date in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
+    :type time_end: str
+    :param limit: How many items to return at one time (max 10)
+    :type limit: int
+
+    :rtype: List[Energy]
+    """
+    return 'do some magic!'
+
+
+def post_energy(asset_id, energy, measurement_time):  # noqa: E501
+    """Publish new energy measurement
+
+     # noqa: E501
+
+    :param asset_id: 
+    :type asset_id: int
+    :param energy: Registered in the asset energy unit
+    :type energy: float
+    :param measurement_time: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
+    :type measurement_time: str
+
+    :rtype: Energy
+    """
+    return 'do some magic!'
