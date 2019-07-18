@@ -5,11 +5,11 @@ from __future__ import absolute_import
 from flask import json
 from six import BytesIO
 
-from swagger_server.models.asset import Asset  # noqa: E501
-from swagger_server.models.asset_role import AssetRole  # noqa: E501
-from swagger_server.models.energy_unit import EnergyUnit  # noqa: E501
-from swagger_server.models.error import Error  # noqa: E501
-from swagger_server.test import BaseTestCase
+from api.model.asset import Asset  # noqa: E501
+from api.model.asset_role import AssetRole  # noqa: E501
+from api.model.energy_unit import EnergyUnit  # noqa: E501
+from api.model.error import Error  # noqa: E501
+from api.test import BaseTestCase
 
 
 class TestAssetController(BaseTestCase):
