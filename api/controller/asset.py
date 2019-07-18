@@ -1,9 +1,13 @@
 import connexion
 import six
 
+from datetime import datetime
+
 from flask import make_response, abort
+
 from config import db
 from api.model.asset_model import Asset, AssetSchema
+from api.model.energy_model import Energy, EnergySchema
 
 def delete(asset_id):  # noqa: E501
     """Delete an asset and it's metering data
@@ -83,7 +87,7 @@ def get(asset_id):  # noqa: E501
         abort(404, f"Asset not found for ID: {asset_id}")
 
 
-def get_energy(asset_id, time_start=None, time_end=None, limit=None):  # noqa: E501
+def get_energy(asset_id, time_start=None, time_end=None, limit=5):  # noqa: E501
     """Get energy measurements of asset
 
      # noqa: E501
@@ -101,8 +105,17 @@ def get_energy(asset_id, time_start=None, time_end=None, limit=None):  # noqa: E
 
     :rtype: List[Energy]
     """
-    return 'do some magic!'
 
+    update_energy = Energy.query.filter(Energy.measurement_time > time_start, Energy.measurement_time <= time_end).limit(limit).all()
+
+
+    if update_energy is not None:
+        schema = EnergySchema(many=True)
+        # get python object from db object
+        data = schema.dump(update_energy).data
+        return data, 200
+    else:
+        abort(404, f"Asset not found for ID: {asset_id}")
 
 def post_energy(asset_id, energy, measurement_time):  # noqa: E501
     """Publish new energy measurement
@@ -118,4 +131,18 @@ def post_energy(asset_id, energy, measurement_time):  # noqa: E501
 
     :rtype: Energy
     """
-    return 'do some magic!'
+
+    energy_data = {
+        "energy": energy,
+        "measurement_time": measurement_time,
+    }
+
+    schema = EnergySchema()
+    new_energy = schema.load(energy_data, session=db.session).data
+
+    db.session.add(new_energy)
+    db.session.commit()
+
+    data = schema.dump(new_energy).data
+
+    return data, 201
