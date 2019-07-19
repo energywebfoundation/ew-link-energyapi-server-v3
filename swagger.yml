@@ -4,7 +4,7 @@ info:
   description: Company name, project name, purpose of the api creation, date of last
     update, sometimes code author name.
   version: "3-oas3"
-servers: 
+servers:
   - url: https://api.yourcompany.com/v3
     description: replace with server endpoint
 security:
@@ -14,7 +14,7 @@ security:
 paths:
   /asset:
     post:
-      tags: 
+      tags:
         - Asset
       summary: Create a new asset, returns asset id
       parameters:
@@ -83,7 +83,7 @@ paths:
                 $ref: '#/components/schemas/Error'
         501:
           description: 'Not Implemented: The server does not have this message implemented.'
-                
+
   /asset/{assetID}:
     parameters:
       - in: path
@@ -92,7 +92,7 @@ paths:
           type: integer
         required: true
     get:
-      tags: 
+      tags:
         - Asset
       summary: Get asset information by id
       security: [] # No authentication
@@ -104,7 +104,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Asset'
     patch:
-      tags: 
+      tags:
         - Asset
       summary: Update asset information by id
       parameters:
@@ -142,7 +142,7 @@ paths:
       responses:
         200:
           description: Success
-                  
+
   /asset/{assetID}/energy:
     parameters:
       - in: path
@@ -151,10 +151,10 @@ paths:
           type: integer
         required: true
     post:
-      tags: 
+      tags:
         - Energy
       summary: Publish new energy measurement
-      parameters: 
+      parameters:
         - in: query
           name: energy
           description: Registered in the asset energy unit
@@ -219,7 +219,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Energy'
-                
+
 components:
   schemas:
 
@@ -228,7 +228,7 @@ components:
       enum:
         - producer
         - consumer
-          
+
     EnergyUnit:
       type: string
       enum:
@@ -261,7 +261,7 @@ components:
           $ref: '#/components/schemas/EnergyUnit'
         is_accumulated:
           type: boolean
-          
+
     Energy:
       type: object
       description: Energy measured at a certain time
@@ -273,7 +273,7 @@ components:
           type: string
           description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
           format: date-time
-          
+
     Error:
       type: object
       description: Error information

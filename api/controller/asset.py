@@ -16,7 +16,7 @@ def delete(asset_id):  # noqa: E501
 
      # noqa: E501
 
-    :param asset_id: 
+    :param asset_id:
     :type asset_id: int
 
     :rtype: None
@@ -31,19 +31,19 @@ def post(role, energy_unit, is_accumulated, manufacturer=None, model=None, seria
 
     :param role: Whether this assset is a producer or consumer
     :type role: str
-    :param energy_unit: 
+    :param energy_unit:
     :type energy_unit: str
-    :param is_accumulated: 
+    :param is_accumulated:
     :type is_accumulated: bool
-    :param manufacturer: 
+    :param manufacturer:
     :type manufacturer: str
-    :param model: 
+    :param model:
     :type model: str
-    :param serial_number: 
+    :param serial_number:
     :type serial_number: str
-    :param latitude: 
+    :param latitude:
     :type latitude: float
-    :param longitude: 
+    :param longitude:
     :type longitude: float
 
     :rtype: Asset
@@ -62,7 +62,7 @@ def post(role, energy_unit, is_accumulated, manufacturer=None, model=None, seria
     db.session.commit()
 
     data = schema.dump(new_asset).data
-    
+
     return data, 201
 
 
@@ -71,7 +71,7 @@ def get(asset_id):  # noqa: E501
 
      # noqa: E501
 
-    :param asset_id: 
+    :param asset_id:
     :type asset_id: int
 
     :rtype: Asset
@@ -93,17 +93,17 @@ def patch(asset_id, manufacturer=None, model=None, serial_number=None, latitude=
 
      # noqa: E501
 
-    :param asset_id: 
+    :param asset_id:
     :type asset_id: int
-    :param manufacturer: 
+    :param manufacturer:
     :type manufacturer: str
-    :param model: 
+    :param model:
     :type model: str
-    :param serial_number: 
+    :param serial_number:
     :type serial_number: str
-    :param latitude: 
+    :param latitude:
     :type latitude: float
-    :param longitude: 
+    :param longitude:
     :type longitude: float
 
     :rtype: Asset
@@ -125,7 +125,7 @@ def get_energy(asset_id, time_start=None, time_end=None, accumulated=False, limi
 
      # noqa: E501
 
-    :param asset_id: 
+    :param asset_id:
     :type asset_id: int
     :param role: Role of energy asset for which the measurement is returned
     :type role: str
@@ -181,7 +181,7 @@ def post_energy(asset_id, energy, measurement_time):  # noqa: E501
 
      # noqa: E501
 
-    :param asset_id: 
+    :param asset_id:
     :type asset_id: int
     :param energy: Registered in the asset energy unit
     :type energy: float
