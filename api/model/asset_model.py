@@ -32,3 +32,4 @@ class AssetSchema(ma.ModelSchema):
     class Meta:
         model = Asset
         sqla_session = db.session
+        exclude = ("measurements", )
