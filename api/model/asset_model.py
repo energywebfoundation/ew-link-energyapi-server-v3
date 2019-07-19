@@ -1,6 +1,10 @@
 from datetime import datetime
 from config import db, ma
 from marshmallow import fields
+from sqlalchemy.orm import relationship
+from sqlalchemy import sql
+
+from api.model.energy_model import Energy
 
 class Asset(db.Model):
     __tablename__ = "asset"
@@ -14,11 +18,12 @@ class Asset(db.Model):
     energy_unit = db.Column(db.String(32))
     is_accumulated = db.Column(db.Boolean)
     created = db.Column(
-        db.DateTime, default=datetime.utcnow
+        db.DateTime(), default=sql.func.now()
     )
     updated = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime(), default=sql.func.now(), onupdate=sql.func.now()
     )
+    measurements = relationship(Energy)
     
 class AssetSchema(ma.ModelSchema):
     def __init__(self, **kwargs):

@@ -1,9 +1,10 @@
 import connexion
 import six
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import make_response, abort
+from sqlalchemy import func
 
 from config import db
 from api.model.asset_model import Asset, AssetSchema
@@ -105,17 +106,24 @@ def get_energy(asset_id, time_start=None, time_end=None, limit=5):  # noqa: E501
 
     :rtype: List[Energy]
     """
+    # Query db by asset id
+    update_asset = Asset.query.filter(Asset.id == asset_id).one_or_none()
 
-    update_energy = Energy.query.filter(Energy.measurement_time > time_start, Energy.measurement_time <= time_end).limit(limit).all()
-
-
-    if update_energy is not None:
-        schema = EnergySchema(many=True)
-        # get python object from db object
-        data = schema.dump(update_energy).data
-        return data, 200
-    else:
+    if update_asset is None:
         abort(404, f"Asset not found for ID: {asset_id}")
+
+    time_start = datetime.strptime(time_start, "%Y-%m-%dT%H:%M:%S%z")
+    time_end = datetime.strptime(time_end, "%Y-%m-%dT%H:%M:%S%z")
+    update_energy = Energy.query.filter(Energy.asset_id == asset_id, func.DateTime(Energy.measurement_time) >= func.DateTime(time_start), func.DateTime(Energy.measurement_time) <= func.DateTime(time_end)).limit(limit).all()
+
+    from flask_sqlalchemy import get_debug_queries
+    info = get_debug_queries()[1]
+    print(info.statement, info.parameters, info.duration, sep='\n')
+
+    schema = EnergySchema(many=True)
+    # get python object from db object
+    data = schema.dump(update_energy).data
+    return data, 200
 
 def post_energy(asset_id, energy, measurement_time):  # noqa: E501
     """Publish new energy measurement
@@ -132,17 +140,23 @@ def post_energy(asset_id, energy, measurement_time):  # noqa: E501
     :rtype: Energy
     """
 
-    energy_data = {
-        "energy": energy,
-        "measurement_time": measurement_time,
-    }
+    this_asset = Asset.query.filter(Asset.id == asset_id).one_or_none()
 
-    schema = EnergySchema()
-    new_energy = schema.load(energy_data, session=db.session).data
+    if this_asset is not None:
+        try:
+            measurement_time = datetime.strptime(measurement_time, "%Y-%m-%dT%H:%M:%S%z")
+            # convert localtime to UTC
+            measurement_time = measurement_time.replace(tzinfo=timezone.utc) - measurement_time.utcoffset()
+        except ValueError as e:
+            abort(404, str(e))
 
-    db.session.add(new_energy)
-    db.session.commit()
+        energy_data = Energy(energy=energy, measurement_time=measurement_time)
+        this_asset.measurements.append(energy_data)
+        db.session.commit()
 
-    data = schema.dump(new_energy).data
+        schema = EnergySchema()
+        data = schema.dump(energy_data).data
 
-    return data, 201
+        return data, 201
+    else:
+        abort(404, f"Asset not found for ID: {asset_id}")
