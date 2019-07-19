@@ -89,7 +89,7 @@ def get(asset_id):  # noqa: E501
         abort(404, f"Asset not found for ID: {asset_id}")
 
 
-def get_energy(asset_id, time_start=None, time_end=None, limit=5):  # noqa: E501
+def get_energy(asset_id, time_start=None, time_end=None, accumulated=False, limit=5):  # noqa: E501
     """Get energy measurements of asset
 
      # noqa: E501
@@ -113,17 +113,36 @@ def get_energy(asset_id, time_start=None, time_end=None, limit=5):  # noqa: E501
     if update_asset is None:
         abort(404, f"Asset not found for ID: {asset_id}")
 
+
     time_start = ISO8601_to_UTC(time_start)
     time_end = ISO8601_to_UTC(time_end)
-    update_energy = Energy.query.filter(Energy.asset_id == asset_id, func.DateTime(Energy.measurement_time) >= func.DateTime(time_start), func.DateTime(Energy.measurement_time) <= func.DateTime(time_end)).limit(limit).all()
+    if accumulated and not update_asset.is_accumulated:
+        sum_energy = Energy.query.with_entities(
+            func.group_concat(Energy.id).label("ids"),
+            func.sum(Energy.energy).label("energy"),
+            func.max(Energy.created).label("created"),
+            func.max(Energy.measurement_time).label("measurement_time"),
+            func.max(Energy.updated).label("updated")).filter(Energy.asset_id == asset_id, Energy.measurement_time.between(time_start, time_end)).first()
+        schema = EnergySchema()
+        data = schema.dump(sum_energy).data
+        data['ids'] = sum_energy.ids
+    else:
+        update_energy = Energy.query.filter(Energy.asset_id == asset_id, Energy.measurement_time.between(time_start, time_end))
+        if accumulated:
+            # get the latest measurement
+            update_energy = update_energy.order_by(Energy.measurement_time.desc()).limit(1).first()
+            schema = EnergySchema()
+        else:
+            update_energy = update_energy.limit(limit).all()
+            schema = EnergySchema(many=True)
+        # get python object from db object
+        data = schema.dump(update_energy).data
 
     from flask_sqlalchemy import get_debug_queries
-    info = get_debug_queries()[1]
-    print(info.statement, info.parameters, info.duration, sep='\n')
 
-    schema = EnergySchema(many=True)
-    # get python object from db object
-    data = schema.dump(update_energy).data
+    info = get_debug_queries()[1]
+    #print(info.statement, info.parameters, info.duration, sep='\n')
+
     return data, 200
 
 def post_energy(asset_id, energy, measurement_time):  # noqa: E501

@@ -1,8 +1,7 @@
 openapi: 3.0.1
 info:
   title: Energy Measurement API
-  description: >-
-    Company name, project name, purpose of the api creation, date of last
+  description: Company name, project name, purpose of the api creation, date of last
     update, sometimes code author name.
   version: "3-oas3"
 servers: 
@@ -130,7 +129,7 @@ paths:
           schema:
             type: number
         - in: query
-          name: measurement_time
+          name: measurementTime
           description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
           required: true
           schema:
@@ -162,9 +161,16 @@ paths:
         schema:
           type: string
           format: date-time
+      - name: accumulated
+        in: query
+        description: Set to True to get one accumulated measurement for the time frame. Note when the assets reports accumulated data, this is equal to the last reading withing the time frame and timeStart does not have an effect.
+        required: false
+        schema:
+          type: boolean
+          default: false
       - name: limit
         in: query
-        description: How many items to return at one time (max 10)
+        description: How many items to return at one time. -1 for no limit
         required: false
         schema:
           type: integer
@@ -230,7 +236,7 @@ components:
         energy:
           type: number
           description: Registered in Mega Watts
-        measurement_time:
+        measurementTime:
           type: string
           description: Time of measurement in the device, in RFC 3339 format. ie. 2018-03-14T17:12:20+00:00
           format: date-time
