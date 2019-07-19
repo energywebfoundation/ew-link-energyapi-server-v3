@@ -9,6 +9,7 @@ from sqlalchemy import func
 from config import db
 from api.model.asset_model import Asset, AssetSchema
 from api.model.energy_model import Energy, EnergySchema
+from util import ISO8601_to_UTC
 
 def delete(asset_id):  # noqa: E501
     """Delete an asset and it's metering data
@@ -112,8 +113,8 @@ def get_energy(asset_id, time_start=None, time_end=None, limit=5):  # noqa: E501
     if update_asset is None:
         abort(404, f"Asset not found for ID: {asset_id}")
 
-    time_start = datetime.strptime(time_start, "%Y-%m-%dT%H:%M:%S%z")
-    time_end = datetime.strptime(time_end, "%Y-%m-%dT%H:%M:%S%z")
+    time_start = ISO8601_to_UTC(time_start)
+    time_end = ISO8601_to_UTC(time_end)
     update_energy = Energy.query.filter(Energy.asset_id == asset_id, func.DateTime(Energy.measurement_time) >= func.DateTime(time_start), func.DateTime(Energy.measurement_time) <= func.DateTime(time_end)).limit(limit).all()
 
     from flask_sqlalchemy import get_debug_queries
@@ -144,9 +145,7 @@ def post_energy(asset_id, energy, measurement_time):  # noqa: E501
 
     if this_asset is not None:
         try:
-            measurement_time = datetime.strptime(measurement_time, "%Y-%m-%dT%H:%M:%S%z")
-            # convert localtime to UTC
-            measurement_time = measurement_time.replace(tzinfo=timezone.utc) - measurement_time.utcoffset()
+            measurement_time = ISO8601_to_UTC(measurement_time)
         except ValueError as e:
             abort(404, str(e))
 
