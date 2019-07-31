@@ -17,7 +17,7 @@ class Energy(db.Model):
         db.DateTime(), default=sql.func.now(), onupdate=sql.func.now()
     )
     asset_id = Column(Integer, ForeignKey('asset.id'))
-    
+
 class EnergySchema(ma.ModelSchema):
     def __init__(self, **kwargs):
         super().__init__(strict=True, **kwargs)
@@ -25,3 +25,4 @@ class EnergySchema(ma.ModelSchema):
     class Meta:
         model = Energy
         sqla_session = db.session
+        fields = ["energy", "measurement_time"]

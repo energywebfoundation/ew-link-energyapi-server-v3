@@ -147,25 +147,21 @@ def get_energy(asset_id, time_start=None, time_end=None, accumulated=False, limi
 
     time_start = ISO8601_to_UTC(time_start)
     time_end = ISO8601_to_UTC(time_end)
+    schema = EnergySchema(many=True)
     if accumulated and not update_asset.is_accumulated:
         sum_energy = Energy.query.with_entities(
-            func.group_concat(Energy.id).label("ids"),
             func.sum(Energy.energy).label("energy"),
             func.max(Energy.created).label("created"),
             func.max(Energy.measurement_time).label("measurement_time"),
-            func.max(Energy.updated).label("updated")).filter(Energy.asset_id == asset_id, Energy.measurement_time.between(time_start, time_end)).first()
-        schema = EnergySchema()
+            func.max(Energy.updated).label("updated")).filter(Energy.asset_id == asset_id, Energy.measurement_time.between(time_start, time_end))
         data = schema.dump(sum_energy).data
-        data['ids'] = sum_energy.ids
     else:
         update_energy = Energy.query.filter(Energy.asset_id == asset_id, Energy.measurement_time.between(time_start, time_end))
         if accumulated:
             # get the latest measurement
-            update_energy = update_energy.order_by(Energy.measurement_time.desc()).limit(1).first()
-            schema = EnergySchema()
+            update_energy = update_energy.order_by(Energy.measurement_time.desc()).limit(1)
         else:
             update_energy = update_energy.limit(limit).all()
-            schema = EnergySchema(many=True)
         # get python object from db object
         data = schema.dump(update_energy).data
 
